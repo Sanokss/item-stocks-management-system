@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\BarangKeluarModel;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BarangKeluarController extends Controller
 {
@@ -12,7 +14,14 @@ class BarangKeluarController extends Controller
      */
     public function index()
     {
-        //
+        $barangKeluar = BarangKeluarModel::with(['barang'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return Inertia::render('Owner/BarangKeluar/Index', [
+            'title' => 'Barang Keluar',
+            'description' => 'Halaman untuk mengelola barang keluar',
+            'dataBarangKeluar' => $barangKeluar,
+        ]);
     }
 
     /**

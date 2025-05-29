@@ -3,25 +3,21 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\BarangMasukModel;
+use App\Models\BarangModel;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class BarangMasukController extends Controller
+class BarangController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-
-        $barangMasuk = BarangMasukModel::with(['barang'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return Inertia::render('Owner/BarangMasuk/Index', [
-            'title' => 'Barang Masuk',
-            'description' => 'Halaman untuk mengelola barang masuk',
-            'dataBarangMasuk' => $barangMasuk,
+        $barang = BarangModel::all()->sortBy('nama_barang');
+        return inertia('Owner/DaftarBarang/Index', [
+            'title' => 'Barang',
+            'description' => 'Halaman untuk mengelola barang',
+            'dataBarang' => $barang,
         ]);
     }
 

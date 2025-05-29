@@ -15,8 +15,8 @@ class BarangMasukSeeder extends Seeder
         // User::factory(10)->create();
 
         BarangMasukModel::create([
-            'nama_barang' => 'Minyak Angin',
-            'jumlah' => 10,
+            'barang_id' => 1,
+            'jumlah' => 20,
             'tanggal_masuk' => now(),
             'keterangan' => 'Barang masuk pertama',
         ]);

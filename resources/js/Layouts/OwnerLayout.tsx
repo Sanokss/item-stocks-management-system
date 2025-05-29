@@ -1,5 +1,5 @@
 import ThemeToggle from '@/Components/ThemeToggle';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     FaArrowLeft,
@@ -7,6 +7,7 @@ import {
     FaDownload,
     FaUpload,
 } from 'react-icons/fa6';
+import { HiTemplate } from 'react-icons/hi';
 import { RiDashboardHorizontalLine } from 'react-icons/ri';
 
 export default function OwnerLayout({
@@ -15,9 +16,14 @@ export default function OwnerLayout({
     children: React.ReactNode;
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const { url } = usePage();
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
+    };
+
+    const isActive = (routeName: string) => {
+        return url.startsWith(route(routeName));
     };
 
     return (
@@ -61,8 +67,12 @@ export default function OwnerLayout({
                             <div>
                                 <nav className="space-y-2">
                                     <Link
-                                        href="#"
-                                        className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        href={route('owner.dashboard')}
+                                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                                            isActive('owner.dashboard')
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                        }`}
                                     >
                                         <RiDashboardHorizontalLine />
                                         <span
@@ -74,8 +84,29 @@ export default function OwnerLayout({
                                         </span>
                                     </Link>
                                     <Link
-                                        href="#"
-                                        className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        href={route('owner.barang.index')}
+                                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                                            isActive('owner.barang.index')
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        <HiTemplate />
+                                        <span
+                                            className={`${
+                                                !sidebarOpen && 'hidden'
+                                            } ml-3`}
+                                        >
+                                            Daftar Barang
+                                        </span>
+                                    </Link>
+                                    <Link
+                                        href={route('owner.barang-masuk.index')}
+                                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                                            isActive('owner.barang-masuk.index')
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                        }`}
                                     >
                                         <FaDownload />
                                         <span
@@ -87,8 +118,16 @@ export default function OwnerLayout({
                                         </span>
                                     </Link>
                                     <Link
-                                        href="#"
-                                        className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        href={route(
+                                            'owner.barang-keluar.index',
+                                        )}
+                                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                                            isActive(
+                                                'owner.barang-keluar.index',
+                                            )
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                        }`}
                                     >
                                         <FaUpload />
                                         <span

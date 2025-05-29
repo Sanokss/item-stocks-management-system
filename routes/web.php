@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Owner\DashboardController;
+use App\Http\Controllers\Owner\BarangKeluarController;
+use App\Http\Controllers\Owner\BarangMasukController;
 use App\Http\Controllers\HeadKitchen\DashboardController as KitchenDashboardController;
+use App\Http\Controllers\Owner\BarangController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +22,30 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/owner/dashboard', [DashboardController::class, 'index'])->name('owner.dashboard');
+
+    // Barang Routes
+    Route::get('/owner/barang', [BarangController::class, 'index'])->name('owner.barang.index');
+    Route::get('/owner/barang/create', [BarangController::class, 'create'])->name('owner.barang.create');
+    Route::post('/owner/barang', [BarangController::class, 'store'])->name('owner.barang.store');
+    Route::get('/owner/barang/{id}/edit', [BarangController::class, 'edit'])->name('owner.barang.edit');
+    Route::put('/owner/barang/{id}', [BarangController::class, 'update'])->name('owner.barang.update');
+    Route::delete('/owner/barang/{id}', [BarangController::class, 'destroy'])->name('owner.barang.destroy');
+
+    // Barang Masuk Routes
+    Route::get('/owner/barang-masuk', [BarangMasukController::class, 'index'])->name('owner.barang-masuk.index');
+    Route::get('/owner/barang-masuk/create', [BarangMasukController::class, 'create'])->name('owner.barang-masuk.create');
+    Route::post('/owner/barang-masuk', [BarangMasukController::class, 'store'])->name('owner.barang-masuk.store');
+    Route::get('/owner/barang-masuk/{id}/edit', [BarangMasukController::class, 'edit'])->name('owner.barang-masuk.edit');
+    Route::put('/owner/barang-masuk/{id}', [BarangMasukController::class, 'update'])->name('owner.barang-masuk.update');
+    Route::delete('/owner/barang-masuk/{id}', [BarangMasukController::class, 'destroy'])->name('owner.barang-masuk.destroy');
+
+    // Barang Keluar Routes
+    Route::get('/owner/barang-keluar', [BarangKeluarController::class, 'index'])->name('owner.barang-keluar.index');
+    Route::get('/owner/barang-keluar/create', [BarangKeluarController::class, 'create'])->name('owner.barang-keluar.create');
+    Route::post('/owner/barang-keluar', [BarangKeluarController::class, 'store'])->name('owner.barang-keluar.store');
+    Route::get('/owner/barang-keluar/{id}/edit', [BarangKeluarController::class, 'edit'])->name('owner.barang-keluar.edit');
+    Route::put('/owner/barang-keluar/{id}', [BarangKeluarController::class, 'update'])->name('owner.barang-keluar.update');
+    Route::delete('/owner/barang-keluar/{id}', [BarangKeluarController::class, 'destroy'])->name('owner.barang-keluar.destroy');
 });
 
 Route::middleware(['auth', 'role:head-kitchen'])->group(function () {

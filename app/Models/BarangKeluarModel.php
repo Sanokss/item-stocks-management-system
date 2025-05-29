@@ -16,4 +16,9 @@ class BarangKeluarModel extends Model
         'tanggal_keluar',
         'keterangan',
     ];
+
+    public function barang()
+    {
+        return $this->belongsTo(BarangModel::class, 'barang_id');
+    }
 }
