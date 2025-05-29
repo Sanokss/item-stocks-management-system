@@ -34,8 +34,6 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
         });
     };
 
-    console.log('Data Barang Masuk:', dataBarang);
-
     // Filter and search logic
     const filteredData = useMemo(() => {
         let filtered = dataBarang || [];

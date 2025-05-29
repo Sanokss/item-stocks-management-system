@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\BarangModel;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BarangController extends Controller
 {
@@ -13,11 +14,11 @@ class BarangController extends Controller
      */
     public function index()
     {
-        $barang = BarangModel::all()->sortBy('nama_barang');
+        $barang = BarangModel::all();
         return inertia('Owner/DaftarBarang/Index', [
             'title' => 'Barang',
             'description' => 'Halaman untuk mengelola barang',
-            'dataBarang' => $barang,
+            'dataBarang' => $barang->values()->toArray(),
         ]);
     }
 
@@ -26,7 +27,10 @@ class BarangController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Owner/DaftarBarang/Create', [
+            'title' => 'Tambah Barang',
+            'description' => 'Halaman untuk menambah barang baru',
+        ]);
     }
 
     /**
@@ -34,7 +38,19 @@ class BarangController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'satuan' => 'required|string|max:255',
+            'stok' => 'required|integer|min:0',
+        ]);
+
+        BarangModel::create([
+            'nama_barang' => $request->nama_barang,
+            'satuan' => $request->satuan,
+            'stok' => $request->stok,
+        ]);
+
+        return redirect()->route('owner.barang.index')->with('success', 'Barang berhasil ditambahkan.');
     }
 
     /**

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\BarangMasukModel;
+use App\Models\BarangModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BarangMasukController extends Controller
@@ -30,15 +32,43 @@ class BarangMasukController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Owner/BarangMasuk/Create', [
+            'title' => 'Tambah Barang Masuk',
+            'description' => 'Halaman untuk menambah barang masuk baru',
+            'dataBarang' => BarangModel::all()->values()->toArray(),
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'barang_id' => 'required|exists:barang,id',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_masuk' => 'required|date',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            // Find the barang
+            $barang = BarangModel::findOrFail($request->barang_id);
+
+            // Create barang masuk record
+            BarangMasukModel::create([
+                'barang_id' => $request->barang_id,
+                'jumlah' => $request->jumlah,
+                'tanggal_masuk' => $request->tanggal_masuk,
+                'keterangan' => $request->keterangan != null ? $request->keterangan : '-',
+            ]);
+
+            // Update stock in BarangModel
+            $barang->increment('stok', $request->jumlah);
+        });
+
+        return redirect()->route('owner.barang-masuk.index')->with('success', 'Barang masuk berhasil ditambahkan dan stok telah diperbarui.');
     }
 
     /**
