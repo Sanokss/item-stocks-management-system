@@ -30,6 +30,7 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/owner/barang/{id}/edit', [BarangController::class, 'edit'])->name('owner.barang.edit');
     Route::put('/owner/barang/{id}', [BarangController::class, 'update'])->name('owner.barang.update');
     Route::delete('/owner/barang/{id}', [BarangController::class, 'destroy'])->name('owner.barang.destroy');
+    Route::get('/owner/barang/cetak', [BarangController::class, 'cetak'])->name('owner.barang.cetak');
 
     // Barang Masuk Routes
     Route::get('/owner/barang-masuk', [BarangMasukController::class, 'index'])->name('owner.barang-masuk.index');
@@ -38,6 +39,7 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/owner/barang-masuk/{id}/edit', [BarangMasukController::class, 'edit'])->name('owner.barang-masuk.edit');
     Route::put('/owner/barang-masuk/{id}', [BarangMasukController::class, 'update'])->name('owner.barang-masuk.update');
     Route::delete('/owner/barang-masuk/{id}', [BarangMasukController::class, 'destroy'])->name('owner.barang-masuk.destroy');
+    Route::get('/owner/barang-masuk/cetak', [BarangMasukController::class, 'cetak'])->name('owner.barang-masuk.cetak');
 
     // Barang Keluar Routes
     Route::get('/owner/barang-keluar', [BarangKeluarController::class, 'index'])->name('owner.barang-keluar.index');
@@ -46,6 +48,7 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/owner/barang-keluar/{id}/edit', [BarangKeluarController::class, 'edit'])->name('owner.barang-keluar.edit');
     Route::put('/owner/barang-keluar/{id}', [BarangKeluarController::class, 'update'])->name('owner.barang-keluar.update');
     Route::delete('/owner/barang-keluar/{id}', [BarangKeluarController::class, 'destroy'])->name('owner.barang-keluar.destroy');
+    Route::get('/owner/barang-keluar/cetak', [BarangKeluarController::class, 'cetak'])->name('owner.barang-keluar.cetak');
 });
 
 Route::middleware(['auth', 'role:head-kitchen'])->group(function () {

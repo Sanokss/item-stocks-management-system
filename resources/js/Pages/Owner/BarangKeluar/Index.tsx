@@ -8,7 +8,7 @@ import {
     FaFilter,
     FaSearch,
 } from 'react-icons/fa';
-import { FaPlus } from 'react-icons/fa6';
+import { FaPlus, FaPrint } from 'react-icons/fa6';
 
 interface BarangKeluar {
     id: number;
@@ -124,13 +124,22 @@ export default function Index({
                             Daftar barang yang keluar dari inventori
                         </p>
                     </div>
-                    <Link
-                        href={route('owner.barang-keluar.create')}
-                        className="inline-flex items-center space-x-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-600"
-                    >
-                        <FaPlus className="h-4 w-4" />
-                        <span>Tambah Barang Keluar</span>
-                    </Link>
+                    <div className="flex space-x-3">
+                        <Link
+                            href={route('owner.barang-keluar.cetak')}
+                            className="inline-flex items-center space-x-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-600"
+                        >
+                            <FaPrint className="h-4 w-4" />
+                            <span>Cetak Laporan</span>
+                        </Link>
+                        <Link
+                            href={route('owner.barang-keluar.create')}
+                            className="inline-flex items-center space-x-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-600"
+                        >
+                            <FaPlus className="h-4 w-4" />
+                            <span>Tambah Barang Keluar</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Search and Filter Section */}

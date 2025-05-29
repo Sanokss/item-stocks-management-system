@@ -102,4 +102,13 @@ class BarangMasukController extends Controller
     {
         //
     }
+
+    public function cetak()
+    {
+        return Inertia::render('Owner/BarangMasuk/Cetak/Index', [
+            'title' => 'Cetak Barang Masuk',
+            'description' => 'Halaman untuk mencetak data barang masuk',
+
+        ]);
+    }
 }

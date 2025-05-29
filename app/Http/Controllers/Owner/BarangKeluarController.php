@@ -100,4 +100,12 @@ class BarangKeluarController extends Controller
     {
         //
     }
+
+    public function cetak()
+    {
+        return Inertia::render('Owner/BarangKeluar/Cetak/Index', [
+            'title' => 'Cetak Daftar Barang',
+            'description' => 'Halaman untuk mencetak daftar barang',
+        ]);
+    }
 }

@@ -84,4 +84,14 @@ class BarangController extends Controller
     {
         //
     }
+
+    public function cetak()
+    {
+        $barang = BarangModel::all();
+        return Inertia::render('Owner/DaftarBarang/Cetak/Index', [
+            'title' => 'Cetak Daftar Barang',
+            'description' => 'Halaman untuk mencetak daftar barang',
+            'dataBarang' => $barang->values()->toArray(),
+        ]);
+    }
 }
