@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\BarangMasukModel;
 use App\Models\BarangModel;
+use App\Exports\BarangMasukExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BarangMasukController extends Controller
 {
@@ -108,7 +110,21 @@ class BarangMasukController extends Controller
         return Inertia::render('Owner/BarangMasuk/Cetak/Index', [
             'title' => 'Cetak Barang Masuk',
             'description' => 'Halaman untuk mencetak data barang masuk',
-
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ]);
+
+        $tanggalAwal = $request->tanggal_awal;
+        $tanggalAkhir = $request->tanggal_akhir;
+        
+        $filename = 'laporan-barang-masuk-' . date('Y-m-d-H-i-s') . '.xlsx';
+        
+        return Excel::download(new BarangMasukExport($tanggalAwal, $tanggalAkhir), $filename);
     }
 }

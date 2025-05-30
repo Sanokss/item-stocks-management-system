@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\BarangKeluarModel;
 use App\Models\BarangModel;
+use App\Exports\BarangKeluarExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BarangKeluarController extends Controller
 {
@@ -104,8 +106,23 @@ class BarangKeluarController extends Controller
     public function cetak()
     {
         return Inertia::render('Owner/BarangKeluar/Cetak/Index', [
-            'title' => 'Cetak Daftar Barang',
-            'description' => 'Halaman untuk mencetak daftar barang',
+            'title' => 'Cetak Barang Keluar',
+            'description' => 'Halaman untuk mencetak daftar barang keluar',
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ]);
+
+        $tanggalAwal = $request->tanggal_awal;
+        $tanggalAkhir = $request->tanggal_akhir;
+        
+        $filename = 'laporan-barang-keluar-' . date('Y-m-d-H-i-s') . '.xlsx';
+        
+        return Excel::download(new BarangKeluarExport($tanggalAwal, $tanggalAkhir), $filename);
     }
 }

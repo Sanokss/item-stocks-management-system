@@ -1,6 +1,6 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
 import { useState } from 'react';
-import { FaCalendarAlt, FaPrint } from 'react-icons/fa';
+import { FaCalendarAlt, FaFileExcel } from 'react-icons/fa';
 
 export default function Index() {
     // Get today's date in YYYY-MM-DD format
@@ -8,8 +8,9 @@ export default function Index() {
 
     const [tanggalAwal, setTanggalAwal] = useState(today);
     const [tanggalAkhir, setTanggalAkhir] = useState(today);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handlePrint = () => {
+    const handleExportExcel = () => {
         if (!tanggalAwal || !tanggalAkhir) {
             alert(
                 'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu',
@@ -22,8 +23,49 @@ export default function Index() {
             return;
         }
 
-        // Add your print logic here
-        console.log('Cetak laporan dari', tanggalAwal, 'sampai', tanggalAkhir);
+        setIsLoading(true);
+
+        // Create form for Excel export
+        const token = document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content');
+
+        if (!token) {
+            alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
+            setIsLoading(false);
+            return;
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = route('owner.barang-masuk.export-excel');
+        form.style.display = 'none';
+
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = token;
+        form.appendChild(csrfInput);
+
+        // Add date inputs
+        const tanggalAwalInput = document.createElement('input');
+        tanggalAwalInput.type = 'hidden';
+        tanggalAwalInput.name = 'tanggal_awal';
+        tanggalAwalInput.value = tanggalAwal;
+        form.appendChild(tanggalAwalInput);
+
+        const tanggalAkhirInput = document.createElement('input');
+        tanggalAkhirInput.type = 'hidden';
+        tanggalAkhirInput.name = 'tanggal_akhir';
+        tanggalAkhirInput.value = tanggalAkhir;
+        form.appendChild(tanggalAkhirInput);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        setTimeout(() => setIsLoading(false), 3000);
     };
 
     const resetForm = () => {
@@ -46,7 +88,7 @@ export default function Index() {
                 </div>
 
                 {/* Form */}
-                <div className="mx-auto rounded-lg bg-white p-8 shadow dark:bg-gray-800">
+                <div className="mx-auto max-w-2xl rounded-lg bg-white p-8 shadow dark:bg-gray-800">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         {/* Tanggal Awal */}
                         <div>
@@ -85,11 +127,14 @@ export default function Index() {
                     {/* Buttons */}
                     <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
                         <button
-                            onClick={handlePrint}
-                            className="inline-flex flex-1 items-center justify-center space-x-2 rounded-md bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-600"
+                            onClick={handleExportExcel}
+                            disabled={isLoading}
+                            className="inline-flex flex-1 items-center justify-center space-x-2 rounded-md bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-700 dark:hover:bg-green-600"
                         >
-                            <FaPrint className="h-4 w-4" />
-                            <span>Cetak Laporan</span>
+                            <FaFileExcel className="h-4 w-4" />
+                            <span>
+                                {isLoading ? 'Mengunduh...' : 'Export Excel'}
+                            </span>
                         </button>
 
                         <button
@@ -107,7 +152,7 @@ export default function Index() {
                                 Preview Laporan
                             </h3>
                             <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-                                Laporan akan menampilkan data barang dari
+                                Laporan akan menampilkan data barang masuk dari
                                 tanggal{' '}
                                 <strong>
                                     {new Date(tanggalAwal).toLocaleDateString(

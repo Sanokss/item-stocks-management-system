@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\BarangModel;
+use App\Exports\BarangExport;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BarangController extends Controller
 {
@@ -93,5 +95,20 @@ class BarangController extends Controller
             'description' => 'Halaman untuk mencetak daftar barang',
             'dataBarang' => $barang->values()->toArray(),
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ]);
+
+        $tanggalAwal = $request->tanggal_awal;
+        $tanggalAkhir = $request->tanggal_akhir;
+        
+        $filename = 'laporan-daftar-barang-' . date('Y-m-d-H-i-s') . '.xlsx';
+        
+        return Excel::download(new BarangExport($tanggalAwal, $tanggalAkhir), $filename);
     }
 }

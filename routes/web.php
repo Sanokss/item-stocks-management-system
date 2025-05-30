@@ -31,6 +31,8 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::put('/owner/barang/{id}', [BarangController::class, 'update'])->name('owner.barang.update');
     Route::delete('/owner/barang/{id}', [BarangController::class, 'destroy'])->name('owner.barang.destroy');
     Route::get('/owner/barang/cetak', [BarangController::class, 'cetak'])->name('owner.barang.cetak');
+    Route::post('/owner/barang/export-excel', [BarangController::class, 'exportExcel'])->name('owner.barang.export-excel');
+    
 
     // Barang Masuk Routes
     Route::get('/owner/barang-masuk', [BarangMasukController::class, 'index'])->name('owner.barang-masuk.index');
@@ -40,6 +42,7 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::put('/owner/barang-masuk/{id}', [BarangMasukController::class, 'update'])->name('owner.barang-masuk.update');
     Route::delete('/owner/barang-masuk/{id}', [BarangMasukController::class, 'destroy'])->name('owner.barang-masuk.destroy');
     Route::get('/owner/barang-masuk/cetak', [BarangMasukController::class, 'cetak'])->name('owner.barang-masuk.cetak');
+    Route::post('/owner/barang-masuk/export-excel', [BarangMasukController::class, 'exportExcel'])->name('owner.barang-masuk.export-excel');
 
     // Barang Keluar Routes
     Route::get('/owner/barang-keluar', [BarangKeluarController::class, 'index'])->name('owner.barang-keluar.index');
@@ -49,6 +52,7 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::put('/owner/barang-keluar/{id}', [BarangKeluarController::class, 'update'])->name('owner.barang-keluar.update');
     Route::delete('/owner/barang-keluar/{id}', [BarangKeluarController::class, 'destroy'])->name('owner.barang-keluar.destroy');
     Route::get('/owner/barang-keluar/cetak', [BarangKeluarController::class, 'cetak'])->name('owner.barang-keluar.cetak');
+    Route::post('/owner/barang-keluar/export-excel', [BarangKeluarController::class, 'exportExcel'])->name('owner.barang-keluar.export-excel');
 });
 
 Route::middleware(['auth', 'role:head-kitchen'])->group(function () {
