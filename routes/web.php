@@ -28,11 +28,11 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/owner/barang/create', [BarangController::class, 'create'])->name('owner.barang.create');
     Route::post('/owner/barang', [BarangController::class, 'store'])->name('owner.barang.store');
     Route::get('/owner/barang/{id}/edit', [BarangController::class, 'edit'])->name('owner.barang.edit');
-    Route::put('/owner/barang/{id}', [BarangController::class, 'update'])->name('owner.barang.update');
+    Route::patch('/owner/barang/{id}', [BarangController::class, 'update'])->name('owner.barang.update');
     Route::delete('/owner/barang/{id}', [BarangController::class, 'destroy'])->name('owner.barang.destroy');
     Route::get('/owner/barang/cetak', [BarangController::class, 'cetak'])->name('owner.barang.cetak');
     Route::post('/owner/barang/export-excel', [BarangController::class, 'exportExcel'])->name('owner.barang.export-excel');
-    
+
 
     // Barang Masuk Routes
     Route::get('/owner/barang-masuk', [BarangMasukController::class, 'index'])->name('owner.barang-masuk.index');

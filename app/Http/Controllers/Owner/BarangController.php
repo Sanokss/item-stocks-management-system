@@ -68,7 +68,11 @@ class BarangController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return Inertia::render('Owner/DaftarBarang/Edit', [
+            'title' => 'Edit Barang',
+            'description' => 'Halaman untuk mengedit barang',
+            'dataBarang' => BarangModel::findOrFail($id),
+        ]);
     }
 
     /**
@@ -76,7 +80,18 @@ class BarangController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'satuan' => 'required|string|max:255',
+        ]);
+
+        $barang = BarangModel::findOrFail($id);
+        $barang->update([
+            'nama_barang' => $request->nama_barang,
+            'satuan' => $request->satuan,
+        ]);
+
+        return redirect()->route('owner.barang.index')->with('success', 'Barang berhasil diperbarui.');
     }
 
     /**
@@ -106,9 +121,9 @@ class BarangController extends Controller
 
         $tanggalAwal = $request->tanggal_awal;
         $tanggalAkhir = $request->tanggal_akhir;
-        
+
         $filename = 'laporan-daftar-barang-' . date('Y-m-d-H-i-s') . '.xlsx';
-        
+
         return Excel::download(new BarangExport($tanggalAwal, $tanggalAkhir), $filename);
     }
 }

@@ -288,9 +288,15 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                                             </td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                                                 <div className="flex space-x-2">
-                                                    <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                                    <Link
+                                                        href={route(
+                                                            'owner.barang.edit',
+                                                            { id: item.id },
+                                                        )}
+                                                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                                    >
                                                         Edit
-                                                    </button>
+                                                    </Link>
                                                     <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                                                         Hapus
                                                     </button>
