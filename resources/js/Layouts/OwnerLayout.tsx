@@ -149,7 +149,7 @@ export default function OwnerLayout({
                     <header className="bg-white shadow dark:bg-gray-800">
                         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
                             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                Owner Dashboard
+                                Dashboard
                             </h1>
 
                             {/* Theme Toggle Button */}
