@@ -46,12 +46,14 @@ export default function Login({ status }: { status?: string }) {
                     <div className="w-full max-w-md">
                         {/* Logo Area */}
                         <div className="mb-8 text-center">
-                            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600">
-                                <img
-                                    src="/images/logo.png"
-                                    alt="logo"
-                                    className="h-16 w-16"
-                                />
+                            <div className="mb-6 flex justify-center">
+                                <div className="relative">
+                                    <img
+                                        src="/images/logo.png"
+                                        alt="Logo Panjang Resto & Cafe"
+                                        className="h-32 w-32 object-contain sm:h-40 sm:w-40 md:h-48 md:w-48"
+                                    />
+                                </div>
                             </div>
                             <h2 className="mb-2 text-2xl font-bold text-gray-900">
                                 Login
