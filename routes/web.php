@@ -11,12 +11,23 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    // Check if user is authenticated
+    if (auth()->check()) {
+        $user = auth()->user();
+
+        // Redirect based on user role
+        switch ($user->role) {
+            case 'owner':
+                return redirect()->route('owner.dashboard');
+            case 'head-kitchen':
+                return redirect()->route('kitchen.dashboard');
+            default:
+                return redirect()->route('dashboard');
+        }
+    }
+
+    // If not authenticated, show welcome page
+    return Inertia::render('Auth/Login');
 });
 
 

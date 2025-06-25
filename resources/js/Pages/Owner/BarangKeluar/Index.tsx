@@ -1,7 +1,7 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-
+import toast from 'react-hot-toast';
 import {
     FaChevronLeft,
     FaChevronRight,
@@ -44,6 +44,27 @@ export default function Index({
         });
     };
 
+    // Delete function - ganti alert dengan toast
+    const handleDelete = (id: number, namaBarang: string, jumlah: number) => {
+        if (
+            confirm(
+                `Apakah Anda yakin ingin menghapus data bahan keluar "${namaBarang}" sebanyak ${jumlah}?\n\nPerhatian: Stok bahan akan dikembalikan sesuai jumlah yang dihapus.\nData yang dihapus tidak dapat dikembalikan.`,
+            )
+        ) {
+            router.delete(route('owner.barang-keluar.destroy', { id }), {
+                onSuccess: () => {
+                    toast.success(
+                        `Data bahan keluar "${namaBarang}" berhasil dihapus dan stok telah dikembalikan`,
+                    );
+                },
+                onError: (errors) => {
+                    console.error('Error deleting:', errors);
+                    toast.error('Gagal menghapus data bahan keluar');
+                },
+            });
+        }
+    };
+
     // Filter and search logic
     const filteredData = useMemo(() => {
         let filtered = dataBarangKeluar || [];
@@ -52,7 +73,7 @@ export default function Index({
         if (searchTerm) {
             filtered = filtered.filter(
                 (item) =>
-                    item.nama_barang
+                    item.barang.nama_barang
                         .toLowerCase()
                         .includes(searchTerm.toLowerCase()) ||
                     item.keterangan
@@ -118,10 +139,10 @@ export default function Index({
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            Barang Keluar
+                            Bahan Keluar
                         </h1>
                         <p className="text-gray-600 dark:text-gray-400">
-                            Daftar barang yang keluar dari inventori
+                            Daftar bahan yang keluar dari inventori
                         </p>
                     </div>
                     <div className="flex space-x-3">
@@ -137,7 +158,7 @@ export default function Index({
                             className="inline-flex items-center space-x-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-600"
                         >
                             <FaPlus className="h-4 w-4" />
-                            <span>Tambah Barang Keluar</span>
+                            <span>Tambah Bahan Keluar</span>
                         </Link>
                     </div>
                 </div>
@@ -148,13 +169,13 @@ export default function Index({
                         {/* Search */}
                         <div className="relative">
                             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Cari Barang
+                                Cari Bahan
                             </label>
                             <div className="relative">
                                 <FaSearch className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Cari nama barang atau keterangan..."
+                                    placeholder="Cari nama bahan atau keterangan..."
                                     value={searchTerm}
                                     onChange={(e) =>
                                         setSearchTerm(e.target.value)
@@ -237,7 +258,7 @@ export default function Index({
                 <div className="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
                     <div className="px-6 py-4">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                            Daftar Barang Keluar
+                            Daftar Bahan Keluar
                         </h2>
                     </div>
 
@@ -249,7 +270,7 @@ export default function Index({
                                         No
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                                        Nama Barang
+                                        Nama Bahan
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
                                         Jumlah
@@ -307,10 +328,26 @@ export default function Index({
                                             </td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                                                 <div className="flex space-x-2">
-                                                    <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                                    <Link
+                                                        href={route(
+                                                            'owner.barang-keluar.edit',
+                                                            { id: item.id },
+                                                        )}
+                                                        className="text-indigo-600 transition-colors duration-200 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                                    >
                                                         Edit
-                                                    </button>
-                                                    <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                                    </Link>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                item.id,
+                                                                item.barang
+                                                                    .nama_barang,
+                                                                item.jumlah,
+                                                            )
+                                                        }
+                                                        className="text-red-600 transition-colors duration-200 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                    >
                                                         Hapus
                                                     </button>
                                                 </div>
@@ -327,7 +364,7 @@ export default function Index({
                                             dateFilter ||
                                             quantityFilter
                                                 ? 'Tidak ada data yang sesuai dengan filter'
-                                                : 'Tidak ada data barang masuk'}
+                                                : 'Tidak ada data bahan keluar'}
                                         </td>
                                     </tr>
                                 )}

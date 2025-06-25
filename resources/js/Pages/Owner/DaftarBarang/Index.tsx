@@ -1,7 +1,7 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-
+import toast from 'react-hot-toast';
 import {
     FaChevronLeft,
     FaChevronRight,
@@ -19,7 +19,13 @@ interface Barang {
     created_at: string;
 }
 
-export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
+interface IndexProps {
+    dataBarang: Barang[];
+    title: string;
+    description: string;
+}
+
+export default function Index({ dataBarang }: IndexProps) {
     // State for search, filter, and pagination
     const [searchTerm, setSearchTerm] = useState('');
     const [dateFilter, setDateFilter] = useState('');
@@ -33,6 +39,25 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
             month: 'long',
             day: 'numeric',
         });
+    };
+
+    // Delete function
+    const handleDelete = (id: number, namaBarang: string) => {
+        if (
+            confirm(
+                `Apakah Anda yakin ingin menghapus bahan "${namaBarang}"?\n\nData yang dihapus tidak dapat dikembalikan.`,
+            )
+        ) {
+            router.delete(route('owner.barang.destroy', { id }), {
+                onSuccess: () => {
+                    toast.success(`Bahan "${namaBarang}" berhasil dihapus`);
+                },
+                onError: (errors) => {
+                    console.error('Error deleting:', errors);
+                    toast.error('Gagal menghapus bahan');
+                },
+            });
+        }
     };
 
     // Filter and search logic
@@ -105,10 +130,10 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            Daftar Barang
+                            Daftar Bahan
                         </h1>
                         <p className="max-w-2xl text-gray-600 dark:text-gray-400">
-                            Daftar barang yang tersedia di sistem. Anda dapat
+                            Daftar bahan yang tersedia di sistem. Anda dapat
                             menambahkan, mengedit, atau menghapus barang sesuai
                             kebutuhan.
                         </p>
@@ -126,7 +151,7 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                             className="inline-flex items-center space-x-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-600"
                         >
                             <FaPlus className="h-4 w-4" />
-                            <span>Tambah Barang</span>
+                            <span>Tambah Bahan</span>
                         </Link>
                     </div>
                 </div>
@@ -137,13 +162,13 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                         {/* Search */}
                         <div className="relative">
                             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Cari Barang
+                                Cari Bahan
                             </label>
                             <div className="relative">
                                 <FaSearch className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Cari nama barang atau keterangan..."
+                                    placeholder="Cari nama bahan atau keterangan..."
                                     value={searchTerm}
                                     onChange={(e) =>
                                         setSearchTerm(e.target.value)
@@ -226,7 +251,7 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                 <div className="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
                     <div className="px-6 py-4">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                            Daftar Barang Masuk
+                            Daftar Bahan Masuk
                         </h2>
                     </div>
 
@@ -238,7 +263,7 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                                         No
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                                        Nama Barang
+                                        Nama Bahan
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
                                         Stok
@@ -297,7 +322,15 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                                                     >
                                                         Edit
                                                     </Link>
-                                                    <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                item.id,
+                                                                item.nama_barang,
+                                                            )
+                                                        }
+                                                        className="text-red-600 transition-colors duration-200 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                    >
                                                         Hapus
                                                     </button>
                                                 </div>
@@ -314,7 +347,7 @@ export default function Index({ dataBarang }: { dataBarang: Barang[] }) {
                                             dateFilter ||
                                             quantityFilter
                                                 ? 'Tidak ada data yang sesuai dengan filter'
-                                                : 'Tidak ada data barang masuk'}
+                                                : 'Tidak ada data bahan masuk'}
                                         </td>
                                     </tr>
                                 )}

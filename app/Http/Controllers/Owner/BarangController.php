@@ -42,17 +42,23 @@ class BarangController extends Controller
     {
         $request->validate([
             'nama_barang' => 'required|string|max:255',
-            'satuan' => 'required|string|max:255',
             'stok' => 'required|integer|min:0',
+            'satuan' => 'required|string|max:50',
         ]);
 
-        BarangModel::create([
-            'nama_barang' => $request->nama_barang,
-            'satuan' => $request->satuan,
-            'stok' => $request->stok,
-        ]);
+        try {
+            BarangModel::create([
+                'nama_barang' => $request->nama_barang,
+                'stok' => $request->stok,
+                'satuan' => $request->satuan,
+            ]);
 
-        return redirect()->route('owner.barang.index')->with('success', 'Barang berhasil ditambahkan.');
+            // Return back to create page (tidak redirect)
+            return back();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal menyimpan data: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -82,16 +88,23 @@ class BarangController extends Controller
     {
         $request->validate([
             'nama_barang' => 'required|string|max:255',
-            'satuan' => 'required|string|max:255',
+            'satuan' => 'required|string|max:50',
         ]);
 
-        $barang = BarangModel::findOrFail($id);
-        $barang->update([
-            'nama_barang' => $request->nama_barang,
-            'satuan' => $request->satuan,
-        ]);
+        try {
+            $barang = BarangModel::findOrFail($id);
 
-        return redirect()->route('owner.barang.index')->with('success', 'Barang berhasil diperbarui.');
+            $barang->update([
+                'nama_barang' => $request->nama_barang,
+                'satuan' => $request->satuan,
+            ]);
+
+            // Return back (tidak redirect, biar toast muncul dulu)
+            return back();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -99,7 +112,27 @@ class BarangController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $barang = BarangModel::findOrFail($id);
+
+            // Check if barang is used in barang_masuk or barang_keluar
+            $isUsedInBarangMasuk = \App\Models\BarangMasukModel::where('barang_id', $id)->exists();
+            $isUsedInBarangKeluar = \App\Models\BarangKeluarModel::where('barang_id', $id)->exists();
+
+            if ($isUsedInBarangMasuk || $isUsedInBarangKeluar) {
+                return back()->withErrors([
+                    'error' => 'Tidak dapat menghapus bahan karena masih digunakan dalam transaksi barang masuk atau keluar.'
+                ]);
+            }
+
+            $barang->delete();
+
+            return redirect()->route('owner.barang.index')->with('success', 'Bahan berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'error' => 'Gagal menghapus bahan: ' . $e->getMessage()
+            ]);
+        }
     }
 
     public function cetak()
@@ -122,8 +155,17 @@ class BarangController extends Controller
         $tanggalAwal = $request->tanggal_awal;
         $tanggalAkhir = $request->tanggal_akhir;
 
-        $filename = 'laporan-daftar-barang-' . date('Y-m-d-H-i-s') . '.xlsx';
+        // Filter data berdasarkan tanggal created_at
+        $dataBarang = BarangModel::whereBetween('created_at', [
+            $tanggalAwal . ' 00:00:00',
+            $tanggalAkhir . ' 23:59:59'
+        ])->get();
 
-        return Excel::download(new BarangExport($tanggalAwal, $tanggalAkhir), $filename);
+        // Format nama file dengan tanggal
+        $fileName = 'Laporan_Daftar_Bahan_' .
+            date('d-m-Y', strtotime($tanggalAwal)) . '_sampai_' .
+            date('d-m-Y', strtotime($tanggalAkhir)) . '.xlsx';
+
+        return Excel::download(new BarangExport($dataBarang), $fileName);
     }
 }

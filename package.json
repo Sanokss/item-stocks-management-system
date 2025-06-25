@@ -38,6 +38,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "react-hot-toast": "^2.5.2",
         "react-icons": "^5.5.0",
         "recharts": "^2.15.3",
         "zustand": "^5.0.5"

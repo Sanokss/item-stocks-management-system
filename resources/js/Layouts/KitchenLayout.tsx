@@ -1,11 +1,13 @@
 import ThemeToggle from '@/Components/ThemeToggle';
-import { Link } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { FaSignOutAlt } from 'react-icons/fa';
 import {
     FaArrowLeft,
     FaArrowRight,
     FaDownload,
     FaUpload,
+    FaUser,
 } from 'react-icons/fa6';
 import { RiDashboardHorizontalLine } from 'react-icons/ri';
 
@@ -15,9 +17,21 @@ export default function KitchenLayout({
     children: React.ReactNode;
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const { url, props } = usePage();
+    const user = props.auth?.user;
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
+    };
+
+    const isActive = (routeName: string) => {
+        return url.startsWith(route(routeName));
+    };
+
+    const handleLogout = () => {
+        if (confirm('Apakah anda yakin ingin keluar?')) {
+            router.post(route('logout'));
+        }
     };
 
     return (
@@ -56,13 +70,17 @@ export default function KitchenLayout({
                             </div>
                         </div>
 
-                        {/* Sidebar Content + ThemeToggle */}
+                        {/* Sidebar Content */}
                         <div className="flex flex-1 flex-col justify-between overflow-y-auto p-4">
                             <div>
                                 <nav className="space-y-2">
                                     <Link
-                                        href="#"
-                                        className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        href={route('kitchen.dashboard')}
+                                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                                            isActive('kitchen.dashboard')
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                        }`}
                                     >
                                         <RiDashboardHorizontalLine />
                                         <span
@@ -101,6 +119,61 @@ export default function KitchenLayout({
                                     </Link>
                                 </nav>
                             </div>
+
+                            {/* User Profile & Logout Section */}
+                            <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
+                                {/* User Profile */}
+                                {sidebarOpen && user && (
+                                    <div className="mb-3 rounded-md bg-gray-50 p-3 dark:bg-gray-700">
+                                        <div className="flex items-center">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white">
+                                                <FaUser className="h-4 w-4" />
+                                            </div>
+                                            <div className="ml-3">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    {user.name}
+                                                </p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {user.email}
+                                                </p>
+                                                <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                    Head Kitchen
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Profile Link */}
+                                <Link
+                                    href={route('profile.edit')}
+                                    className="mb-2 flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    <FaUser />
+                                    <span
+                                        className={`${
+                                            !sidebarOpen && 'hidden'
+                                        } ml-3`}
+                                    >
+                                        Profile
+                                    </span>
+                                </Link>
+
+                                {/* Logout Button */}
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                >
+                                    <FaSignOutAlt />
+                                    <span
+                                        className={`${
+                                            !sidebarOpen && 'hidden'
+                                        } ml-3`}
+                                    >
+                                        Logout
+                                    </span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -113,8 +186,21 @@ export default function KitchenLayout({
                                 Head Kitchen Dashboard
                             </h1>
 
-                            {/* Theme Toggle Button */}
-                            <div className={`${!sidebarOpen && 'text-center'}`}>
+                            {/* Header Right Section */}
+                            <div className="flex items-center space-x-4">
+                                {/* User Info (when sidebar is collapsed) */}
+                                {!sidebarOpen && user && (
+                                    <div className="hidden items-center space-x-3 md:flex">
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                                            {user.name}
+                                        </span>
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white">
+                                            <FaUser className="h-4 w-4" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Theme Toggle Button */}
                                 <ThemeToggle />
                             </div>
                         </div>

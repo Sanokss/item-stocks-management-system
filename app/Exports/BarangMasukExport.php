@@ -23,8 +23,8 @@ class BarangMasukExport implements FromCollection, WithHeadings, WithMapping, Wi
     }
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         return BarangMasukModel::with(['barang'])
@@ -40,7 +40,7 @@ class BarangMasukExport implements FromCollection, WithHeadings, WithMapping, Wi
     {
         return [
             'No',
-            'Nama Barang',
+            'Nama Bahan',
             'Jumlah Masuk',
             'Satuan',
             'Tanggal Masuk',
@@ -67,20 +67,48 @@ class BarangMasukExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => ['font' => ['bold' => true]],
+            // Style the header row
+            1 => [
+                'font' => [
+                    'bold' => true,
+                    'size' => 12,
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => [
+                        'rgb' => 'E2E8F0',
+                    ],
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+            ],
+            // Style all data rows
+            'A:G' => [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ],
         ];
     }
 
     public function columnWidths(): array
     {
         return [
-            'A' => 5,
-            'B' => 25,
-            'C' => 15,
-            'D' => 10,
-            'E' => 15,
-            'F' => 20,
-            'G' => 18,
+            'A' => 5,   // No
+            'B' => 25,  // Nama Bahan
+            'C' => 15,  // Jumlah Masuk
+            'D' => 10,  // Satuan
+            'E' => 15,  // Tanggal Masuk
+            'F' => 20,  // Keterangan
+            'G' => 18,  // Tanggal Input
         ];
     }
 }

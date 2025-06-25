@@ -79,11 +79,11 @@ export default function Index() {
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Cetak Laporan Barang Keluar
+                        Cetak Laporan Bahan Keluar
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400">
-                        Pilih rentang tanggal untuk mencetak laporan daftar
-                        barang keluar
+                        Pilih rentang tanggal untuk mencetak laporan bahan
+                        keluar
                     </p>
                 </div>
 
@@ -152,7 +152,7 @@ export default function Index() {
                                 Preview Laporan
                             </h3>
                             <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-                                Laporan akan menampilkan data barang keluar dari
+                                Laporan akan menampilkan data bahan keluar dari
                                 tanggal{' '}
                                 <strong>
                                     {new Date(tanggalAwal).toLocaleDateString(
@@ -175,6 +175,17 @@ export default function Index() {
                                         },
                                     )}
                                 </strong>
+                            </p>
+                            <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                                📄 Nama file: Laporan_Bahan_Keluar_
+                                {new Date(tanggalAwal)
+                                    .toLocaleDateString('id-ID')
+                                    .replace(/\//g, '-')}
+                                _sampai_
+                                {new Date(tanggalAkhir)
+                                    .toLocaleDateString('id-ID')
+                                    .replace(/\//g, '-')}
+                                .xlsx
                             </p>
                         </div>
                     )}

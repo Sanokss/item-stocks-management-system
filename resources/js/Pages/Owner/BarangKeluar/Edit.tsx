@@ -1,67 +1,50 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
-import { router, useForm } from '@inertiajs/react';
-import { useMemo } from 'react';
+import { Link, router, useForm } from '@inertiajs/react';
 import toast from 'react-hot-toast';
 
 interface Barang {
     id: number;
     nama_barang: string;
-    stok: number;
     satuan: string;
+    stok: number;
 }
 
-interface Props {
+interface BarangKeluar {
+    id: number;
+    barang_id: number;
+    jumlah: number;
+    tanggal_keluar: string;
+    keterangan: string;
+    barang: Barang;
+}
+
+interface EditProps {
+    dataBarangKeluar: BarangKeluar;
     dataBarang: Barang[];
 }
 
-export default function Create({ dataBarang }: Props) {
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
-
-    const { data, setData, post, processing, errors } = useForm({
-        barang_id: '',
-        jumlah: '',
-        tanggal_keluar: today,
-        keterangan: '',
+export default function Edit({ dataBarangKeluar, dataBarang }: EditProps) {
+    const { data, setData, put, processing, errors } = useForm({
+        barang_id: dataBarangKeluar.barang_id,
+        jumlah: dataBarangKeluar.jumlah,
+        tanggal_keluar: dataBarangKeluar.tanggal_keluar,
+        keterangan: dataBarangKeluar.keterangan,
     });
-
-    // Get selected barang info
-    const selectedBarang = useMemo(() => {
-        if (!data.barang_id) return null;
-        return dataBarang.find(
-            (barang) => barang.id === parseInt(data.barang_id),
-        );
-    }, [data.barang_id, dataBarang]);
-
-    // Check if quantity exceeds stock
-    const isQuantityValid = useMemo(() => {
-        if (!selectedBarang || !data.jumlah) return true;
-        return parseInt(data.jumlah) <= selectedBarang.stok;
-    }, [selectedBarang, data.jumlah]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Additional frontend validation
-        if (!isQuantityValid) {
-            toast.error('Jumlah yang dimasukkan melebihi stok yang tersedia!');
-            return;
-        }
-
-        post(route('owner.barang-keluar.store'), {
+        put(route('owner.barang-keluar.update', { id: dataBarangKeluar.id }), {
             onSuccess: () => {
-                // Show success toast
-                toast.success(
-                    `Bahan keluar "${selectedBarang?.nama_barang}" sebanyak ${data.jumlah} berhasil ditambahkan!`,
+                // Get selected barang name for toast
+                const selectedBarang = dataBarang.find(
+                    (barang) => barang.id === data.barang_id,
                 );
 
-                // Reset form
-                setData({
-                    barang_id: '',
-                    jumlah: '',
-                    tanggal_keluar: today,
-                    keterangan: '',
-                });
+                // Show success toast
+                toast.success(
+                    `Data bahan keluar "${selectedBarang?.nama_barang}" berhasil diperbarui!`,
+                );
 
                 // Redirect to index after 2 seconds
                 setTimeout(() => {
@@ -85,8 +68,15 @@ export default function Create({ dataBarang }: Props) {
     return (
         <OwnerLayout>
             <div className="container mx-auto p-4">
-                <h1 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Tambah Bahan Keluar
+                <Link
+                    href={route('owner.barang-keluar.index')}
+                    className="text-blue-500 hover:underline"
+                >
+                    ← Kembali ke Daftar Bahan Keluar
+                </Link>
+
+                <h1 className="my-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    Edit Bahan Keluar
                 </h1>
 
                 <form onSubmit={handleSubmit}>
@@ -95,20 +85,18 @@ export default function Create({ dataBarang }: Props) {
                             className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                             htmlFor="barang_id"
                         >
-                            Pilih Bahan
+                            Nama Bahan
                         </label>
                         <select
                             id="barang_id"
                             className="w-full rounded border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                             value={data.barang_id}
-                            onChange={(e) => {
-                                setData('barang_id', e.target.value);
-                                // Reset jumlah when changing barang
-                                setData('jumlah', '');
-                            }}
+                            onChange={(e) =>
+                                setData('barang_id', parseInt(e.target.value))
+                            }
                             required
                         >
-                            <option value="">Pilih bahan</option>
+                            <option value="">Pilih Bahan</option>
                             {dataBarang.map((barang) => (
                                 <option key={barang.id} value={barang.id}>
                                     {barang.nama_barang} ({barang.satuan}) -
@@ -123,51 +111,27 @@ export default function Create({ dataBarang }: Props) {
                         )}
                     </div>
 
-                    {/* Stock Information */}
-                    {selectedBarang && (
-                        <div className="mb-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                Informasi Stok
-                            </h3>
-                            <p className="text-sm text-blue-600 dark:text-blue-300">
-                                Stok tersedia:{' '}
-                                <span className="font-semibold">
-                                    {selectedBarang.stok}{' '}
-                                    {selectedBarang.satuan}
-                                </span>
-                            </p>
-                        </div>
-                    )}
-
                     <div className="mb-4">
                         <label
                             className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                             htmlFor="jumlah"
                         >
-                            Jumlah Keluar
+                            Jumlah
                         </label>
                         <input
                             type="number"
                             onWheel={(e) => e.currentTarget.blur()}
                             id="jumlah"
-                            className={`w-full rounded border p-2 focus:outline-none focus:ring-1 ${
-                                !isQuantityValid
-                                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
-                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700'
-                            } dark:text-gray-100`}
-                            placeholder="Masukkan jumlah bahan keluar"
+                            className="w-full rounded border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                            placeholder="Masukkan jumlah bahan"
                             value={data.jumlah}
-                            onChange={(e) => setData('jumlah', e.target.value)}
-                            required
+                            onChange={(e) =>
+                                setData('jumlah', parseInt(e.target.value))
+                            }
                             min="1"
-                            max={selectedBarang?.stok || 1000000}
+                            max="1000000"
+                            required
                         />
-                        {!isQuantityValid && data.jumlah && selectedBarang && (
-                            <div className="mt-1 text-sm text-red-500">
-                                Jumlah melebihi stok yang tersedia (
-                                {selectedBarang.stok} {selectedBarang.satuan})
-                            </div>
-                        )}
                         {errors.jumlah && (
                             <div className="mt-1 text-sm text-red-500">
                                 {errors.jumlah}
@@ -208,13 +172,13 @@ export default function Create({ dataBarang }: Props) {
                         </label>
                         <textarea
                             id="keterangan"
-                            rows={3}
                             className="w-full rounded border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                             placeholder="Masukkan keterangan (opsional)"
                             value={data.keterangan}
                             onChange={(e) =>
                                 setData('keterangan', e.target.value)
                             }
+                            rows={3}
                         />
                         {errors.keterangan && (
                             <div className="mt-1 text-sm text-red-500">
@@ -226,25 +190,18 @@ export default function Create({ dataBarang }: Props) {
                     <div className="flex space-x-4">
                         <button
                             type="submit"
-                            disabled={processing || !isQuantityValid}
-                            className={`rounded px-6 py-2 text-white transition-colors ${
-                                processing || !isQuantityValid
-                                    ? 'cursor-not-allowed bg-gray-400'
-                                    : 'bg-blue-500 hover:bg-blue-600'
-                            }`}
+                            disabled={processing}
+                            className="rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {processing
-                                ? 'Menyimpan...'
-                                : 'Simpan Bahan Keluar'}
+                            {processing ? 'Menyimpan...' : 'Perbarui Data'}
                         </button>
 
-                        <button
-                            type="button"
-                            onClick={() => window.history.back()}
+                        <Link
+                            href={route('owner.barang-keluar.index')}
                             className="rounded bg-gray-500 px-6 py-2 text-white transition-colors hover:bg-gray-600"
                         >
                             Batal
-                        </button>
+                        </Link>
                     </div>
                 </form>
             </div>

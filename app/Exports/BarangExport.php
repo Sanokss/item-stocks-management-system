@@ -2,86 +2,107 @@
 
 namespace App\Exports;
 
-use App\Models\BarangModel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Carbon\Carbon;
 
 class BarangExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
 {
-    protected $tanggalAwal;
-    protected $tanggalAkhir;
+    protected $data;
 
-    public function __construct($tanggalAwal, $tanggalAkhir)
+    public function __construct($data)
     {
-        $this->tanggalAwal = $tanggalAwal;
-        $this->tanggalAkhir = $tanggalAkhir;
+        $this->data = $data;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
     public function collection()
     {
-        return BarangModel::whereBetween('created_at', [
-            $this->tanggalAwal . ' 00:00:00',
-            $this->tanggalAkhir . ' 23:59:59'
-        ])->get();
+        return $this->data;
     }
 
     public function headings(): array
     {
         return [
             'No',
-            'Nama Barang',
+            'Nama Bahan',
             'Stok',
             'Satuan',
+            'Status Stok',
             'Tanggal Dibuat',
-            'Status Stok'
         ];
     }
 
     public function map($barang): array
     {
         static $no = 1;
-        
-        $statusStok = 'Tinggi';
+
+        // Determine stock status
+        $statusStok = '';
         if ($barang->stok <= 10) {
-            $statusStok = 'Rendah';
+            $statusStok = 'Stok Rendah';
         } elseif ($barang->stok <= 50) {
-            $statusStok = 'Sedang';
+            $statusStok = 'Stok Sedang';
+        } else {
+            $statusStok = 'Stok Tinggi';
         }
 
         return [
             $no++,
             $barang->nama_barang,
             $barang->stok,
-            strtoupper($barang->satuan),
-            Carbon::parse($barang->created_at)->format('d/m/Y'),
-            $statusStok
+            $barang->satuan,
+            $statusStok,
+            date('d/m/Y H:i', strtotime($barang->created_at)),
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => ['font' => ['bold' => true]],
+            // Style the header row
+            1 => [
+                'font' => [
+                    'bold' => true,
+                    'size' => 12,
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => [
+                        'rgb' => 'E2E8F0',
+                    ],
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+            ],
+            // Style all data rows
+            'A:F' => [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ],
         ];
     }
 
     public function columnWidths(): array
     {
         return [
-            'A' => 5,
-            'B' => 25,
-            'C' => 10,
-            'D' => 10,
-            'E' => 15,
-            'F' => 15,
+            'A' => 5,   // No
+            'B' => 25,  // Nama Bahan
+            'C' => 10,  // Stok
+            'D' => 12,  // Satuan
+            'E' => 15,  // Status Stok
+            'F' => 20,  // Tanggal Dibuat
         ];
     }
 }

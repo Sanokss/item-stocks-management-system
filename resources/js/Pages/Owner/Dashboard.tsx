@@ -1,5 +1,11 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
-import { FaBox, FaTruck, FaWarehouse } from 'react-icons/fa';
+import { Link } from '@inertiajs/react';
+import {
+    FaBox,
+    FaExclamationTriangle,
+    FaTruck,
+    FaWarehouse,
+} from 'react-icons/fa';
 import {
     Area,
     AreaChart,
@@ -13,23 +19,44 @@ import {
     YAxis,
 } from 'recharts';
 
-export default function Dashboard() {
-    // Sample data for charts
-    const monthlyData = [
-        { name: 'Jan', masuk: 40, keluar: 24 },
-        { name: 'Feb', masuk: 30, keluar: 13 },
-        { name: 'Mar', masuk: 20, keluar: 18 },
-        { name: 'Apr', masuk: 27, keluar: 39 },
-        { name: 'May', masuk: 18, keluar: 48 },
-        { name: 'Jun', masuk: 23, keluar: 38 },
-    ];
+interface Stats {
+    totalBahan: number;
+    bahanMasukBulanIni: number;
+    bahanKeluarBulanIni: number;
+    stokRendah: number;
+}
 
-    const stockData = [
-        { name: 'Stok Tinggi', value: 45, color: '#10B981' },
-        { name: 'Stok Sedang', value: 30, color: '#F59E0B' },
-        { name: 'Stok Rendah', value: 25, color: '#EF4444' },
-    ];
+interface MonthlyData {
+    name: string;
+    masuk: number;
+    keluar: number;
+}
 
+interface StockData {
+    name: string;
+    value: number;
+    color: string;
+}
+
+interface BahanStokRendah {
+    nama_barang: string;
+    stok: number;
+    satuan: string;
+}
+
+interface DashboardProps {
+    stats: Stats;
+    monthlyData: MonthlyData[];
+    stockData: StockData[];
+    bahanStokRendah: BahanStokRendah[];
+}
+
+export default function Dashboard({
+    stats,
+    monthlyData,
+    stockData,
+    bahanStokRendah,
+}: DashboardProps) {
     return (
         <OwnerLayout>
             <div className="container mx-auto p-6">
@@ -47,21 +74,65 @@ export default function Dashboard() {
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400">
                                 Kelola inventori Anda dengan mudah. Pantau stok
-                                barang, track barang masuk dan keluar, serta
+                                bahan, track bahan masuk dan keluar, serta
                                 dapatkan notifikasi ketika stok rendah.
                             </p>
                         </div>
                         <div className="mt-4 md:mt-0">
-                            <button className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">
+                            <Link
+                                href={route('owner.barang.cetak')}
+                                className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
+                            >
                                 Lihat Laporan
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
-                {/* Main Stats Grid */}
 
+                {/* Alert untuk Stok Rendah */}
+                {bahanStokRendah.length > 0 && (
+                    <div className="mb-6 rounded-xl bg-red-50 p-6 shadow-lg dark:bg-red-900/20">
+                        <div className="flex items-start">
+                            <FaExclamationTriangle className="mr-3 mt-1 h-5 w-5 text-red-600 dark:text-red-400" />
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+                                    Peringatan: Stok Rendah!
+                                </h3>
+                                <p className="mt-1 text-sm text-red-700 dark:text-red-300">
+                                    {bahanStokRendah.length} bahan memiliki stok
+                                    rendah (≤ 10):
+                                </p>
+                                <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                                    {bahanStokRendah
+                                        .slice(0, 6)
+                                        .map((bahan, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between rounded-lg bg-red-100 px-3 py-2 dark:bg-red-900/30"
+                                            >
+                                                <span className="text-sm font-medium text-red-800 dark:text-red-200">
+                                                    {bahan.nama_barang}
+                                                </span>
+                                                <span className="text-xs text-red-600 dark:text-red-400">
+                                                    {bahan.stok} {bahan.satuan}
+                                                </span>
+                                            </div>
+                                        ))}
+                                </div>
+                                {bahanStokRendah.length > 6 && (
+                                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                                        ... dan {bahanStokRendah.length - 6}{' '}
+                                        bahan lainnya
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Main Stats Grid */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    {/* Total Barang Card */}
+                    {/* Total Bahan Card */}
                     <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-gray-800">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gray-50 dark:bg-gray-700"></div>
                         <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-600"></div>
@@ -75,10 +146,10 @@ export default function Dashboard() {
 
                             <div className="mt-4">
                                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    Total Barang
+                                    Total Bahan
                                 </p>
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                    100
+                                    {stats.totalBahan}
                                 </p>
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     Item tersedia
@@ -87,7 +158,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Barang Masuk Card */}
+                    {/* Bahan Masuk Card */}
                     <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-gray-800">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gray-50 dark:bg-gray-700"></div>
                         <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-600"></div>
@@ -101,10 +172,10 @@ export default function Dashboard() {
 
                             <div className="mt-4">
                                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    Barang Masuk
+                                    Bahan Masuk
                                 </p>
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                    45
+                                    {stats.bahanMasukBulanIni}
                                 </p>
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     Bulan ini
@@ -113,7 +184,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Barang Keluar Card */}
+                    {/* Bahan Keluar Card */}
                     <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-gray-800">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gray-50 dark:bg-gray-700"></div>
                         <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-600"></div>
@@ -127,10 +198,10 @@ export default function Dashboard() {
 
                             <div className="mt-4">
                                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    Barang Keluar
+                                    Bahan Keluar
                                 </p>
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                    32
+                                    {stats.bahanKeluarBulanIni}
                                 </p>
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     Bulan ini
@@ -156,7 +227,7 @@ export default function Dashboard() {
                                     Stok Rendah
                                 </p>
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                    8
+                                    {stats.stokRendah}
                                 </p>
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     Perlu restok
@@ -171,46 +242,52 @@ export default function Dashboard() {
                     {/* Monthly Trend Chart */}
                     <div className="rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800">
                         <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                            Trend Barang Masuk & Keluar (6 Bulan Terakhir)
+                            Trend Bahan Masuk & Keluar (6 Bulan Terakhir)
                         </h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <AreaChart data={monthlyData}>
-                                <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    className="opacity-30"
-                                />
-                                <XAxis
-                                    dataKey="name"
-                                    className="text-gray-600 dark:text-gray-400"
-                                />
-                                <YAxis className="text-gray-600 dark:text-gray-400" />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'white',
-                                        border: '1px solid #e5e7eb',
-                                        borderRadius: '8px',
-                                        boxShadow:
-                                            '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                                    }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="masuk"
-                                    stackId="1"
-                                    stroke="#10B981"
-                                    fill="#10B981"
-                                    fillOpacity={0.3}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="keluar"
-                                    stackId="1"
-                                    stroke="#F59E0B"
-                                    fill="#F59E0B"
-                                    fillOpacity={0.3}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {monthlyData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <AreaChart data={monthlyData}>
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        className="opacity-30"
+                                    />
+                                    <XAxis
+                                        dataKey="name"
+                                        className="text-gray-600 dark:text-gray-400"
+                                    />
+                                    <YAxis className="text-gray-600 dark:text-gray-400" />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #e5e7eb',
+                                            borderRadius: '8px',
+                                            boxShadow:
+                                                '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="masuk"
+                                        stackId="1"
+                                        stroke="#10B981"
+                                        fill="#10B981"
+                                        fillOpacity={0.3}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="keluar"
+                                        stackId="1"
+                                        stroke="#F59E0B"
+                                        fill="#F59E0B"
+                                        fillOpacity={0.3}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
+                                Belum ada data transaksi
+                            </div>
+                        )}
                     </div>
 
                     {/* Stock Distribution Chart */}
@@ -218,48 +295,61 @@ export default function Dashboard() {
                         <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                             Distribusi Status Stok
                         </h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={stockData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={100}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {stockData.map((entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={entry.color}
+                        {stockData.length > 0 ? (
+                            <>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <PieChart>
+                                        <Pie
+                                            data={stockData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {stockData.map((entry, index) => (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={entry.color}
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'white',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '8px',
+                                                boxShadow:
+                                                    '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                                            }}
                                         />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                <div className="mt-4 flex justify-center space-x-4">
+                                    {stockData.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center"
+                                        >
+                                            <div
+                                                className="mr-2 h-3 w-3 rounded-full"
+                                                style={{
+                                                    backgroundColor: item.color,
+                                                }}
+                                            ></div>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                {item.name} ({item.value})
+                                            </span>
+                                        </div>
                                     ))}
-                                </Pie>
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'white',
-                                        border: '1px solid #e5e7eb',
-                                        borderRadius: '8px',
-                                        boxShadow:
-                                            '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                                    }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="mt-4 flex justify-center space-x-4">
-                            {stockData.map((item, index) => (
-                                <div key={index} className="flex items-center">
-                                    <div
-                                        className="mr-2 h-3 w-3 rounded-full"
-                                        style={{ backgroundColor: item.color }}
-                                    ></div>
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                                        {item.name}
-                                    </span>
                                 </div>
-                            ))}
-                        </div>
+                            </>
+                        ) : (
+                            <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
+                                Belum ada data bahan
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
