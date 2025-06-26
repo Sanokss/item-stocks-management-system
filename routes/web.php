@@ -43,6 +43,8 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::delete('/owner/barang/{id}', [BarangController::class, 'destroy'])->name('owner.barang.destroy');
     Route::get('/owner/barang/cetak', [BarangController::class, 'cetak'])->name('owner.barang.cetak');
     Route::post('/owner/barang/export-excel', [BarangController::class, 'exportExcel'])->name('owner.barang.export-excel');
+    Route::post('/export-pdf', [BarangController::class, 'exportPdf'])->name('owner.barang.export-pdf');
+    Route::get('/stock-check', [BarangController::class, 'checkLowStock'])->name('owner.barang.stock-check');
 
 
     // Barang Masuk Routes

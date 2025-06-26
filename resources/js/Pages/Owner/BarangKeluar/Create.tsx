@@ -1,4 +1,5 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { router, useForm } from '@inertiajs/react';
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export default function Create({ dataBarang }: Props) {
+    const { checkStockLevel } = useNotificationStore();
+
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
 
@@ -50,6 +53,25 @@ export default function Create({ dataBarang }: Props) {
 
         post(route('owner.barang-keluar.store'), {
             onSuccess: () => {
+                // Check if stock becomes low after transaction
+                const selectedBarang = dataBarang.find(
+                    (barang) => barang.id === parseInt(data.barang_id),
+                );
+
+                if (selectedBarang) {
+                    const newStock =
+                        selectedBarang.stok - parseInt(data.jumlah);
+                    checkStockLevel(
+                        {
+                            id: selectedBarang.id,
+                            nama_barang: selectedBarang.nama_barang,
+                            stok: newStock,
+                            satuan: selectedBarang.satuan,
+                        },
+                        10, // minimum stock = 10
+                    );
+                }
+
                 // Show success toast
                 toast.success(
                     `Bahan keluar "${selectedBarang?.nama_barang}" sebanyak ${data.jumlah} berhasil ditambahkan!`,

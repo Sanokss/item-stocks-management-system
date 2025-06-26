@@ -1,6 +1,7 @@
 import OwnerLayout from '@/Layouts/OwnerLayout';
 import { useState } from 'react';
-import { FaCalendarAlt, FaFileExcel } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+import { FaCalendarAlt, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 
 export default function Index() {
     // Get today's date in YYYY-MM-DD format
@@ -8,38 +9,47 @@ export default function Index() {
 
     const [tanggalAwal, setTanggalAwal] = useState(today);
     const [tanggalAkhir, setTanggalAkhir] = useState(today);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingExcel, setIsLoadingExcel] = useState(false);
+    const [isLoadingPdf, setIsLoadingPdf] = useState(false);
 
-    const handleExportExcel = () => {
+    const validateDates = () => {
         if (!tanggalAwal || !tanggalAkhir) {
-            alert(
+            toast.error(
                 'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu',
             );
-            return;
+            return false;
         }
 
         if (new Date(tanggalAwal) > new Date(tanggalAkhir)) {
-            alert('Tanggal awal tidak boleh lebih besar dari tanggal akhir');
-            return;
+            toast.error(
+                'Tanggal awal tidak boleh lebih besar dari tanggal akhir',
+            );
+            return false;
         }
 
-        setIsLoading(true);
+        return true;
+    };
 
-        // Alternative approach with proper CSRF token handling
+    const getCSRFToken = () => {
         const token = document
             .querySelector('meta[name="csrf-token"]')
             ?.getAttribute('content');
 
         if (!token) {
-            alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
-            setIsLoading(false);
-            return;
+            toast.error('CSRF token tidak ditemukan. Silakan refresh halaman.');
+            return null;
         }
+        return token;
+    };
+
+    const createFormAndSubmit = (action: string, onComplete: () => void) => {
+        const token = getCSRFToken();
+        if (!token) return;
 
         // Create and submit form with proper CSRF token
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = route('owner.barang.export-excel');
+        form.action = action;
         form.style.display = 'none';
 
         // Add CSRF token
@@ -66,7 +76,27 @@ export default function Index() {
         form.submit();
         document.body.removeChild(form);
 
-        setTimeout(() => setIsLoading(false), 3000);
+        setTimeout(onComplete, 3000);
+    };
+
+    const handleExportExcel = () => {
+        if (!validateDates()) return;
+
+        setIsLoadingExcel(true);
+        createFormAndSubmit(route('owner.barang.export-excel'), () => {
+            setIsLoadingExcel(false);
+            toast.success('File Excel berhasil diunduh!');
+        });
+    };
+
+    const handleExportPdf = () => {
+        if (!validateDates()) return;
+
+        setIsLoadingPdf(true);
+        createFormAndSubmit(route('owner.barang.export-pdf'), () => {
+            setIsLoadingPdf(false);
+            toast.success('File PDF berhasil diunduh!');
+        });
     };
 
     const resetForm = () => {
@@ -83,8 +113,8 @@ export default function Index() {
                         Cetak Laporan Daftar Bahan
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400">
-                        Pilih rentang tanggal untuk mencetak laporan daftar
-                        bahan
+                        Pilih rentang tanggal dan format file untuk mencetak
+                        laporan daftar bahan
                     </p>
                 </div>
 
@@ -125,24 +155,49 @@ export default function Index() {
                         </div>
                     </div>
 
-                    {/* Buttons */}
-                    <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-                        <button
-                            onClick={handleExportExcel}
-                            disabled={isLoading}
-                            className="inline-flex flex-1 items-center justify-center space-x-2 rounded-md bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-700 dark:hover:bg-green-600"
-                        >
-                            <FaFileExcel className="h-4 w-4" />
-                            <span>
-                                {isLoading ? 'Mengunduh...' : 'Export Excel'}
-                            </span>
-                        </button>
+                    {/* Export Buttons */}
+                    <div className="mt-6">
+                        <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Pilih Format Export
+                        </label>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {/* Excel Button */}
+                            <button
+                                onClick={handleExportExcel}
+                                disabled={isLoadingExcel || isLoadingPdf}
+                                className="inline-flex items-center justify-center space-x-2 rounded-md bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-700 dark:hover:bg-green-600"
+                            >
+                                <FaFileExcel className="h-4 w-4" />
+                                <span>
+                                    {isLoadingExcel
+                                        ? 'Mengunduh...'
+                                        : 'Export Excel'}
+                                </span>
+                            </button>
 
+                            {/* PDF Button */}
+                            <button
+                                onClick={handleExportPdf}
+                                disabled={isLoadingExcel || isLoadingPdf}
+                                className="inline-flex items-center justify-center space-x-2 rounded-md bg-red-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-600"
+                            >
+                                <FaFilePdf className="h-4 w-4" />
+                                <span>
+                                    {isLoadingPdf
+                                        ? 'Mengunduh...'
+                                        : 'Export PDF'}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Reset Button */}
+                    <div className="mt-4">
                         <button
                             onClick={resetForm}
-                            className="inline-flex items-center justify-center rounded-md bg-gray-100 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:flex-initial"
+                            className="w-full rounded-md bg-gray-100 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                         >
-                            Reset
+                            Reset Tanggal
                         </button>
                     </div>
 
@@ -176,17 +231,30 @@ export default function Index() {
                                     )}
                                 </strong>
                             </p>
-                            <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-                                📄 Nama file: Laporan_Daftar_Bahan_
-                                {new Date(tanggalAwal)
-                                    .toLocaleDateString('id-ID')
-                                    .replace(/\//g, '-')}
-                                _sampai_
-                                {new Date(tanggalAkhir)
-                                    .toLocaleDateString('id-ID')
-                                    .replace(/\//g, '-')}
-                                .xlsx
-                            </p>
+                            <div className="mt-2 space-y-1">
+                                <p className="text-xs text-blue-600 dark:text-blue-400">
+                                    📄 Excel: Laporan_Daftar_Bahan_
+                                    {new Date(tanggalAwal)
+                                        .toLocaleDateString('id-ID')
+                                        .replace(/\//g, '-')}
+                                    _sampai_
+                                    {new Date(tanggalAkhir)
+                                        .toLocaleDateString('id-ID')
+                                        .replace(/\//g, '-')}
+                                    .xlsx
+                                </p>
+                                <p className="text-xs text-blue-600 dark:text-blue-400">
+                                    📋 PDF: Laporan_Daftar_Bahan_
+                                    {new Date(tanggalAwal)
+                                        .toLocaleDateString('id-ID')
+                                        .replace(/\//g, '-')}
+                                    _sampai_
+                                    {new Date(tanggalAkhir)
+                                        .toLocaleDateString('id-ID')
+                                        .replace(/\//g, '-')}
+                                    .pdf
+                                </p>
+                            </div>
                         </div>
                     )}
                 </div>

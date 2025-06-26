@@ -1,6 +1,8 @@
+import StockNotification from '@/Components/StockNotification';
 import ThemeToggle from '@/Components/ThemeToggle';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import {
     FaArrowLeft,
@@ -20,6 +22,22 @@ export default function OwnerLayout({
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const { url, props } = usePage();
     const user = props.auth?.user;
+
+    // Get notification store actions
+    const { setLowStockItems } = useNotificationStore();
+
+    // Load initial stock data and check for low stock items
+    useEffect(() => {
+        // Fetch current stock data from backend
+        fetch(route('owner.barang.stock-check'))
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.lowStockItems) {
+                    setLowStockItems(data.lowStockItems);
+                }
+            })
+            .catch((error) => console.error('Error checking stock:', error));
+    }, [setLowStockItems]);
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
@@ -244,6 +262,9 @@ export default function OwnerLayout({
                                         </div>
                                     </div>
                                 )}
+
+                                {/* Stock Notification */}
+                                <StockNotification />
 
                                 {/* Theme Toggle Button */}
                                 <ThemeToggle />
